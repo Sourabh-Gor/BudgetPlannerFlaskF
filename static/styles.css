@@ -1,0 +1,43 @@
+body {
+    font-family: 'Hind', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1B1B3A;
+    color: #FFFFFF;
+}
+
+.sidenav {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #FF3562;
+    padding-top: 20px;
+}
+
+.sidenav h2 {
+    margin-bottom: 20px;
+    font-size: 30px;
+    margin-right: 10px;
+}
+
+.sidenav a {
+    padding: 15px 8px 15px 32px;
+    text-decoration: none;
+    font-size: 23px;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: #FF3562;
+    font-size: 26px; /* Increase font size on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+
+.content {
+    margin-left: 250px;
+    padding: 16px;
+}
