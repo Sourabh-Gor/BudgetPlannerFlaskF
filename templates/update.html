@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Update Budget</h2>
+    <form action="{{ url_for('update_budget', budget_id=budget.id) }}" method="post">
+        <label for="amount">New Amount: </label>
+        <input type="number" name="amount" value="{{ budget.amount }}" required>
+        <button type="submit">Update</button>
+    </form>
+{% endblock %}

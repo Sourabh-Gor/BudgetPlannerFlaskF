@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Plot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1 style="color: black;">Monthly Expense Plot</h1>
+
+    <div id="plot-section">
+        <h2 style="color: black;">Expense Plot</h2>
+        <img src="data:image/png;base64,{{ image }}" alt="Expense Plot">
+    </div>
+</div>
+<center><a href="/generate_report"><button >Download Report</button></a></center>
+</body>
+</html>

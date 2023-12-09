@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind&family=Oswald&display=swap" rel="stylesheet">
+<!-- Font Awesome CDN for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
 <body>
 
@@ -17,12 +19,24 @@
 
 <!-- Left Navigation Bar -->
 <div class="sidenav">
-    <center><h2 style="font-family: 'Oswald', sans-serif; color: #1b1b3a;">Home</h2></center>
-    <a href="#" style="color: #1b1b3a;font-family: 'Hind', sans-serif;">Monthly Budget</a>
-    <a href="#" style="color: #1b1b3a;font-family: 'Hind', sans-serif;">Categorical Limit</a>
-    <a href="#" style="color: #1b1b3a;font-family: 'Hind', sans-serif;">Monthly Expenses</a>
-    <a href="#" style="color: #1b1b3a;font-family: 'Hind', sans-serif;">Generate Report</a>
+    <center><h2 style="font-family: 'Oswald', sans-serif; color: #1b1b3a;"><i class="fa fa-home" aria-hidden="true"></i>Home</h2></center>
+    <a href="/budget" style="color: #1b1b3a;font-family: 'Hind', sans-serif;"><i class="fa fa-calendar" aria-hidden="true"></i>Monthly Budget</a>
+    <a href="/expenses" style="color: #1b1b3a;font-family: 'Hind', sans-serif;"><i class="fa fa-credit-card" aria-hidden="true"></i>Monthly Expenses</a>
+    <a href="/report" style="color: #1b1b3a;font-family: 'Hind', sans-serif;"><i class="fa fa-bar-chart" aria-hidden="true"></i>Generate Report</a>
+    <a href="/login" style="color: #1b1b3a; font-family: 'Hind', sans-serif;"><i class="fa fa-sign-in" aria-hidden="true"></i> Login</a>
+    <a href="/signup" style="color: #1b1b3a; font-family: 'Hind', sans-serif;"><i class="fa fa-user-plus" aria-hidden="true"></i> Signup</a>
+
+</div>
+<center><img src="{{ url_for('static', filename='img1.jpg') }}" alt="" style="height: 400px; width: 400px;"></center>
+<!-- Content Section -->
+<div class="content">
+    {% block content %}{% endblock %}
 </div>
 
+
+<div class="header">
+    <h5 style="font-family: 'Oswald', sans-serif; color: #F84AA7; text-align: center;font-size: 60px;margin-bottom: 4px;" >Budget crafters</h5>
+    <h6 style="font-family: 'Oswald', sans-serif; color: #F84AA7; text-align: center;font-size: 60px; margin-top: 2px;">Where numbers meet innovation</h6>
+</div>
 </body>
 </html>

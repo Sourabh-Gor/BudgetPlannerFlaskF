@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Budget Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1 style="color: black;">Monthly Budget Result</h1>
+
+    <div id="result-section">
+        <h2 style="color: black;">Result</h2>
+        <p style="color: black;">Total Monthly Budget: ${{ '{:,.2f}'.format(budget) }}</p>
+        <p style="color: black;">Expenses: ${{ '{:,.2f}'.format(sum(expenses)) }}</p>
+        <p style="color: black;">Total Expenses: ${{ '{:,.2f}'.format(total_expenses) }}</p>
+        <p style="color: black;">Remaining Budget: ${{ '{:,.2f}'.format(remaining_budget) }}</p>
+    </div>
+</div>
+<center><a href="/report"><button >Generate Graph</button></a></center>
+
+
+</body>
+</html>

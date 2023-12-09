@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Set Monthly Budget</h2>
+    <form action="{{ url_for('set_budget') }}" method="post">
+        <label for="budget">Enter Monthly Budget:</label>
+        <input type="number" name="budget" required>
+        <button type="submit">Set Budget</button>
+    </form>
+
+    <h2>Add Monthly Expenses</h2>
+    <form action="{{ url_for('add_expense') }}" method="post">
+        <label for="expense">Enter Expense:</label>
+        <input type="number" name="expense" required>
+        <button type="submit">Add Expense</button>
+    </form>
+
+    <h2>Calculate Result</h2>
+    <a href="{{ url_for('calculate_result') }}">Calculate Result</a>
+
+    <h2>Current Status</h2>
+    <p>Monthly Budget: {{ budget }}</p>
+    <p>Expenses: {{ expenses | join(', ') }}</p>
+{% endblock %}

@@ -41,3 +41,61 @@ body {
     margin-left: 250px;
     padding: 16px;
 }
+
+form {
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px;
+    background-color: #A74482;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #693668;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    color: #A74482;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 10px;
+    background-color: #F84AA7;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+
+
+
+
+#current-status p {
+    margin-bottom: 10px;
+}

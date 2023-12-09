@@ -1,0 +1,103 @@
+/* Main body styling */
+body {
+    background-color: #1B1B3A; /* Dark Blue Background */
+    color: #FF3562; /* Bright Pink Text */
+    font-family: 'Hind', sans-serif; /* Hind font for the body */
+    text-align: center; /* Center align everything */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh; /* Full viewport height */
+    padding: 20px; /* Padding around the body */
+}
+
+/* Styling for the h2 heading */
+h2 {
+    color: #A74482; /* Pinkish Purple Color */
+    margin-bottom: 30px; /* Add some space below the heading */
+    font-family: 'Oswald', sans-serif; /* Oswald font for headings */
+    font-size: 2.8em; /* Larger font size for heading */
+    font-weight: 600; /* Bold font weight for heading */
+}
+
+/* Styling for form elements */
+form {
+    display: inline-block; /* Align form in the center */
+    margin: auto;
+    background-color: #693668; /* Dark Purple Background */
+    padding: 50px;
+    border-radius: 10px; /* Rounded Corners */
+    box-shadow: 0px 0px 20px 8px rgba(0,0,0,0.25); /* More pronounced shadow for depth */
+    max-width: 400px; /* Maximum width for better responsiveness */
+}
+
+/* Styling for input fields */
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    display: block; /* Make each input occupy its own line */
+    margin: 10px auto 20px; /* Center align and add space around */
+    width: calc(100% - 20px); /* Full width minus padding */
+    padding: 12px; /* Slightly more padding inside the text boxes */
+    border: 2px solid #A74482; /* Add border with a color */
+    border-radius: 6px; /* Slightly more rounded corners */
+    font-size: 1.1em; /* Increase font size */
+    background-color: #FFFFFF; /* White background for the text boxes */
+    color: #693668; /* Text color */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for focus effect */
+}
+
+/* Enhance the focus effect */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+    outline: none; /* Remove default focus outline */
+    border-color: #F84AA7; /* Change border color on focus */
+    box-shadow: 0 0 10px 0 rgba(168, 68, 130, 0.4); /* More pronounced shadow effect */
+}
+
+/* Styling for the submit button */
+input[type="submit"] {
+    background-color: #FF3562; /* Bright Pink Background */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 6px;
+    cursor: pointer; /* Hand cursor on hover */
+    font-size: 1.1em; /* Increase font size */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+input[type="submit"]:hover {
+    background-color: #F84AA7; /* Lighter Pink on hover */
+}
+
+/* Styling for labels */
+label {
+    color: #F84AA7; /* Light Pink Color */
+    font-size: 1.2em; /* Slightly larger font size */
+    margin-bottom: 5px; /* Space between label and input */
+    font-weight: 500; /* Medium font weight for clarity */
+}
+
+/* Styling for links */
+a {
+    color: #A74482; /* Pinkish Purple Color */
+    text-decoration: none; /* No underline */
+    font-size: 1.1em; /* Increase font size */
+    transition: color 0.3s; /* Smooth transition for hover effect */
+}
+
+a:hover {
+    color: #F84AA7; /* Change color on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* Styling for messages */
+.messages {
+    color: #F84AA7; /* Light Pink Color */
+    list-style-type: none; /* Remove bullet points */
+    padding: 0;
+    font-size: 1.1em; /* Increase font size */
+    margin: 10px 0; /* Add margin for spacing */
+}
