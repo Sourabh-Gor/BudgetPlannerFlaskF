@@ -62,7 +62,7 @@ button:hover {
     max-width: 800px;
     margin: 50px auto;
     padding: 20px;
-    background-color: #fff;
+    background-color:#A74482 ;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -90,12 +90,41 @@ button {
     color: #fff;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
 }
 
 
+/* All links (visited and unvisited) */
+a {
+    color: #008000; /* Replace with your desired color code */
+}
 
 
 
 #current-status p {
     margin-bottom: 10px;
 }
+
+
+/* Add this CSS to your stylesheets or in a style tag within your HTML file */
+
+/* Style the label for better alignment */
+label {
+    margin: 10px;
+}
+
+/* Style the select dropdown */
+select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Style the options within the dropdown */
+select option {
+    background-color: #fff;
+    color: #333;
+}
+
+

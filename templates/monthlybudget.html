@@ -8,14 +8,10 @@
         <button type="submit">Submit</button>
     </form>
 
-    <h2>Budget List</h2>
-    <ul>
-        {% for budget in budgets %}
-            <li>
-                {{ budget.amount }}
-                <a href="{{ url_for('update_budget', budget_id=budget.id) }}">Update</a>
-                <a href="{{ url_for('delete_budget', budget_id=budget.id) }}">Delete</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <h2>Budget Information</h2>
+    <p>Your current monthly budget: {{ budget }}</p>
+    <p>
+        <a href="{{ url_for('update_budget') }}">Update Budget</a> |
+        <a href="{{ url_for('delete_budget') }}">Delete Budget</a>
+    </p>
 {% endblock %}

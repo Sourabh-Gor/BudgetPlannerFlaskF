@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import io
 import base64
 import matplotlib.pyplot as plt
@@ -13,45 +12,48 @@ import string
 from reportlab.pdfgen import canvas
 from flask import send_file
 import tempfile
+from datetime import datetime
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget.db'
-db = SQLAlchemy(app)
-monthly_budget = 0
-expenses = []
-
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['MAIL_SERVER'] = 'smtp.yourmailprovider.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'your_email@example.com'
-app.config['MAIL_PASSWORD'] = 'your_email_password'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Use SQLite for simplicity
 
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
-mail = Mail(app)
-
-
-class User(db.Model):
+# User model with UserMixin for Flask-Login
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    amount = db.Column(db.Float, default=0.0, nullable=False)
+    expenses = db.relationship('Expense', backref='user', lazy=True)
 
-class Budget(db.Model):
+class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/')
-def trw():
+def home():
+    print(current_user.is_authenticated)
     return render_template('base.html')
 
 @app.route('/view_users')
 def view_users():
     users = User.query.all()
     return render_template('view_users.html', users=users)
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -62,12 +64,20 @@ def login():
         user = User.query.filter_by(name=name, password=password).first()
 
         if user:
+            login_user(user)
             flash('Login successful!', 'success')
             return redirect(url_for('home'))
         else:
             flash('Invalid username or password. Please try again.', 'error')
 
     return render_template('login.html')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -87,122 +97,187 @@ def signup():
     return render_template('signup.html')
 
 
-@app.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password():
-    if request.method == 'POST':
-        name = request.form['name']
-
-        user = User.query.filter_by(name=name).first()
-
-        if user:
-            reset_token = generate_reset_token()
-            send_reset_email(user.name, user.email, reset_token)
-
-            flash('Password reset email sent. Please check your email.', 'success')
-            return redirect(url_for('login'))
-
-        else:
-            flash('User not found. Please check the entered username.', 'error')
-
-    return render_template('forgot_password.html')
-
-
-def generate_reset_token():
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=30))
-
-
-def send_reset_email(username, email, token):
-    reset_link = url_for('reset_password', username=username, token=token, _external=True)
-    subject = 'Password Reset Request'
-    body = f"Hi {username},\n\nTo reset your password, click the following link:\n{reset_link}"
-
-    msg = Message(subject, sender='your_email@example.com', recipients=[email])
-    msg.body = body
-
-    mail.send(msg)
-
-
-@app.route('/expenses')
-def home():
-    return render_template('index.html', budget=monthly_budget, expenses=expenses)
 
 @app.route('/budget')
-def xyz():
-    budgets = Budget.query.all()
-    return render_template('monthlybudget.html',budgets=budgets)
+@login_required
+def budget():
+    return render_template('monthlybudget.html', budget=current_user.amount)
 
 
 
+# Add a check in add_budget to prevent creating multiple budgets for the same user
 @app.route('/add_budget', methods=['POST'])
+@login_required
 def add_budget():
+    # Check if the user already has a budget
+    print(f"Current User Amount: {current_user.amount}")
+
+    # if current_user.amount is not None:
+    #     flash('You already have a budget. To update it, please use the update page.', 'warning')
+    #     return redirect(url_for('budget'))
+
     amount = request.form.get('amount')
+    print(f"Amount from Form: {amount}")
 
     if amount:
-        new_budget = Budget(amount=amount)
-        db.session.add(new_budget)
+        current_user.amount = amount
         db.session.commit()
+        print("Budget added successfully")
+
+    print(f"Updated Current User Amount: {current_user.amount}")
 
     return redirect(url_for('budget'))
 
-@app.route('/update_budget/<int:budget_id>', methods=['GET', 'POST'])
-def update_budget(budget_id):
-    budget = Budget.query.get_or_404(budget_id)
 
+
+
+
+@app.route('/update_budget/', methods=['GET', 'POST'])
+@login_required
+def update_budget():
     if request.method == 'POST':
         new_amount = request.form.get('amount')
-        budget.amount = new_amount
+        current_user.amount = new_amount
         db.session.commit()
         return redirect(url_for('budget'))
 
-    return render_template('update_budget.html', budget=budget)
+    return render_template('update.html', budget=current_user.amount)
 
-@app.route('/delete_budget/<int:budget_id>')
-def delete_budget(budget_id):
-    budget = Budget.query.get_or_404(budget_id)
-    db.session.delete(budget)
+
+@app.route('/delete_budget')
+@login_required
+def delete_budget():
+    current_user.amount = 0.0  # Set the budget to zero (or any default value)
     db.session.commit()
     return redirect(url_for('budget'))
 
-@app.route('/set_budget', methods=['POST'])
-def set_budget():
-    global monthly_budget
-    monthly_budget = float(request.form['budget'])
-    return redirect(url_for('home'))
+@app.route('/expenses')
+@login_required
+def expenses():
+    expenses = Expense.query.filter_by(user_id=current_user.id)
+    return render_template('expenses.html', expenses=expenses, budget=current_user.amount)
 
+# Create a new expense and add it to the database
 @app.route('/add_expense', methods=['POST'])
+@login_required
 def add_expense():
-    expense = float(request.form['expense'])
-    expenses.append(expense)
-    return redirect(url_for('home'))
+    try:
+        amount = float(request.form.get('amount'))
+    except (ValueError, TypeError):
+        return redirect(url_for('expenses'))
+
+    description = request.form.get('description')
+
+    if not description or amount is None:
+        return redirect(url_for('expenses'))
+
+    expense = Expense(description=description, amount=amount, user_id=current_user.id)
+    db.session.add(expense)
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+
+    return redirect(url_for('expenses'))
+
+
+# Update an existing expense in the database
+@app.route("/edit_expense/<int:expense_id>", methods=['GET', 'POST'])
+@login_required
+def edit_expense(expense_id):
+    expense = Expense.query.get_or_404(expense_id)
+
+    if request.method == 'POST':
+        description = request.form.get('description')
+        amount = request.form.get('amount')
+
+        if not description or not amount:
+            return redirect(url_for('expenses'))
+
+        expense.description = description
+        expense.amount = amount
+        db.session.commit()
+
+        return redirect(url_for('expenses'))
+
+    return render_template('edit_expense.html', expense=expense)
+
+# Delete an expense from the database
+@app.route('/delete_expense/<int:expense_id>', methods=['GET'])
+@login_required
+def delete_expense(expense_id):
+    expense = Expense.query.get_or_404(expense_id)
+    db.session.delete(expense)
+    db.session.commit()
+    return redirect(url_for('expenses'))
+
+
+from flask import render_template
 
 @app.route('/calculate_result')
+@login_required
 def calculate_result():
-    total_expenses = sum(expenses)
-    remaining_budget = monthly_budget - total_expenses
-    return render_template('result.html', budget=monthly_budget, expenses=expenses, total_expenses=total_expenses, remaining_budget=remaining_budget, sum=sum)
+    # Fetch expenses for the current user
+    expenses = Expense.query.filter_by(user_id=current_user.id).all()
 
+    # Fetch the budget for the current user
+    budget = current_user.amount
 
+    # Calculate total expenses
+    total_expenses = sum(expense.amount for expense in expenses)
+
+    # Calculate remaining budget
+    remaining_budget = budget - total_expenses
+
+    return render_template('result.html', budget=budget, expenses=expenses, total_expenses=total_expenses, remaining_budget=remaining_budget)
 
 @app.route('/report')
-def plot_expenses():
-    # Create a bar plot of expenses
+@login_required
+def plot_chart():
+    expenses = Expense.query.filter_by(user_id=current_user.id)
+    x = [expense.description for expense in expenses]
+    y = [expense.amount for expense in expenses]
     fig, ax = plt.subplots()
-    ax.plot(range(1, len(expenses) + 1), expenses, color='blue')
-    ax.scatter(range(1, len(expenses) + 1), expenses, color='blue')
-    ax.set_xlabel('Expense')
-    ax.set_ylabel('Amount')
-    ax.set_title('Monthly Expenses')
+    ax.pie(y, labels=x, autopct='%1.1f%%')
+    ax.set_title('Expenses')
+    ax.axis('equal')
+    img = io.BytesIO()
+    fig.savefig(img, format='png')
+    img.seek(0)
+    image_base64 = base64.b64encode(img.getvalue()).decode('utf-8')
+    return render_template('plot_expenses.html', image=image_base64)
 
-    # Save the plot to a BytesIO object
-    image_stream = io.BytesIO()
-    plt.savefig(image_stream, format='png')
-    image_stream.seek(0)
 
-    # Encode the plot image as base64
-    encoded_image = base64.b64encode(image_stream.read()).decode('utf-8')
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import datetime
 
-    return render_template('plot_expenses.html', image=encoded_image)
+# @app.route("/download")
+# @login_required
+# def download_pdf():
+#     # Create a PDF object
+#     pdf = canvas.Canvas("report.pdf")
 
+#     # Draw things on the PDF. Here's where the PDF generation happens.
+#     # See the ReportLab documentation for the full list of functionality.
+#     pdf.setFont("Helvetica", 12)
+#     pdf.drawString(100, 750, f"{current_user.name}'s Budget Planner Report")
+#     pdf.drawString(100, 730, "Additional content can be added here.")
+
+#     # Close the PDF object cleanly, and we're done.
+#     pdf.showPage()
+#     pdf.save()
+
+#     return redirect(url_for('expenses'))
+
+import io
+import os
+from flask import Flask, send_file
+from reportlab.pdfgen import canvas
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import tempfile
 
 
 @app.route('/generate_report')
@@ -211,81 +286,121 @@ def generate_report():
     # Replace this with your actual authentication logic
 
     # Get the user's name (you might need to modify this based on your authentication mechanism)
-    user_name = "John Doe"  # Replace this with the actual user's name
+      # Replace this with the actual user's name
 
     # Generate the PDF content
-    pdf_content = generate_pdf_content(user_name)
+    pdf_content = generate_pdf_content(current_user.name)
 
     # Rewind the BytesIO object to the beginning
     pdf_content.seek(0)
 
-    # Serve the PDF file
+    # Serve the PDF file as an attachment for download
     return send_file(
-        io.BytesIO(pdf_content.read()),
+        pdf_content,
         as_attachment=True,
         download_name='budget_report.pdf',
         mimetype='application/pdf'
     )
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 def generate_pdf_content(user_name):
     # Create a PDF document using reportlab
     pdf_buffer = io.BytesIO()
-    pdf = canvas.Canvas(pdf_buffer)
+    pdf = SimpleDocTemplate(pdf_buffer, pagesize=letter)
 
-    # Add content to the PDF
-    pdf.setFont("Helvetica", 12)
-    pdf.drawString(100, 750, f"{user_name}'s Budget Planner Report")
-    pdf.drawString(100, 730, "Additional content can be added here.")
+    # Content for the PDF
+    content = []
 
-    # Add the graph to the PDF
-    graph_image = generate_plot_image()
-    pdf.drawImage(graph_image, x=100, y=500, width=400, height=300)
+    # Add title
+    title_style = ParagraphStyle(
+        'TitleWithBorder',
+        parent=getSampleStyleSheet()['Title'],
+        borderPadding=(10, 5, 5, 5),
+        borderColor=colors.black,
+        borderWidth=1,
+    )
+    title_text = f"{user_name}'s Budget Planner Report"
+    content.append(Paragraph(title_text, title_style))
+    # Add expenses details
+    expenses = Expense.query.filter_by(user_id=current_user.id).all()
+    if expenses:
+        content.append(Spacer(1, 12))  # Add some space
 
-    # Save the PDF to the buffer
-    pdf.showPage()
-    pdf.save()
+        expense_heading_style = ParagraphStyle(
+            'ExpenseHeading',
+            parent=getSampleStyleSheet()['Heading1'],
+        )
+        expense_heading_text = "Expenses Details"
+        content.append(Paragraph(expense_heading_text, expense_heading_style))
+
+        for expense in expenses:
+            expense_style = getSampleStyleSheet()['BodyText']
+            expense_text = f"<b>Description:</b> {expense.description}<br/>" \
+                           f"<b>Amount:</b> {expense.amount}<br/>" \
+                           f"<b>Date:</b> {expense.date}<br/>"
+            content.append(Paragraph(expense_text, expense_style))
+
+    # Add budget
+    budget = current_user.amount  # Replace with the actual budget value
+    budget_style = getSampleStyleSheet()['BodyText']
+    budget_text = f"<br/><b>Budget:</b> {budget}"
+    content.append(Paragraph(budget_text, budget_style))
+
+
+    # Save the Matplotlib plot to a BytesIO buffer
+    img_buffer = io.BytesIO()
+    expenses = Expense.query.filter_by(user_id=current_user.id)
+    x = [expense.description for expense in expenses]
+    y = [expense.amount for expense in expenses]
+    fig, ax = plt.subplots()
+    ax.pie(y, labels=x, autopct='%1.1f%%')
+    ax.set_title('Expenses')
+    ax.axis('equal')
+    fig.savefig(img_buffer, format='png')
+    img_buffer.seek(0)
+
+    # Add the Matplotlib plot as an Image to the PDF
+    img = Image(img_buffer, width=400, height=300)
+    content.append(img)
+
+    # Build the PDF document
+    pdf.build(content)
 
     # Reset the buffer position to the beginning
     pdf_buffer.seek(0)
 
     return pdf_buffer
 
-def generate_plot_image():
-    # Create a bar plot of expenses
+
+def save_plot_to_tempfile():
+    # Generate a sample plot using Matplotlib
+    expenses = Expense.query.filter_by(user_id=current_user.id)
+    x = [expense.description for expense in expenses]
+    y = [expense.amount for expense in expenses]
     fig, ax = plt.subplots()
-    ax.plot(range(1, len(expenses) + 1), expenses, color='blue')
-    ax.scatter(range(1, len(expenses) + 1), expenses, color='blue')
-    ax.set_xlabel('Expense')
-    ax.set_ylabel('Amount')
-    ax.set_title('Monthly Expenses')
+    ax.pie(y, labels=x, autopct='%1.1f%%')
+    ax.set_title('Expenses')
+    ax.axis('equal')
+    img = io.BytesIO()
+    fig.savefig(img, format='png')
+    img.seek(0)
 
-    # Save the plot to a BytesIO object
-    image_stream = io.BytesIO()
-    plt.savefig(image_stream, format='png')
-    image_stream.seek(0)
+    # Save the Matplotlib plot to a temporary file
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    temp_file_path = temp_file.name
+    canvas = FigureCanvas(fig)
+    canvas.print_png(temp_file_path)
+    temp_file.close()
 
-    # Return the BytesIO object
-    return image_stream
-
-@app.route('/reset_password/<username>/<token>', methods=['GET', 'POST'])
-def reset_password(username, token):
-    if request.method == 'POST':
-        new_password = request.form['new_password']
-        # Update the user's password in the database
-        user = User.query.filter_by(name=username).first()
-        if user:
-            user.password = new_password
-            db.session.commit()
-            flash('Password reset successful! Please login with your new password.', 'success')
-            return redirect(url_for('login'))
-
-    return render_template('reset_password.html', username=username, token=token)
-
+    return temp_file_path
 
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        db.create_all()   # Create the database tables
     app.run(debug=True)
-
-
-

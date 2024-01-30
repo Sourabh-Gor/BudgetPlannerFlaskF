@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Edit Expense</h2>
+    <form action="{{ url_for('edit_expense', expense_id=expense.id) }}" method="post">
+        <label for="description">Category:</label>
+            <select name="description" required>
+                <option value="" disabled selected>Please choose a category</option>
+                <option value="food">Food</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="travel">Travel</option>
+                <option value="loan">Loan</option>
+                <option value="subscriptions">Subscriptions</option>
+                <option value="medical">Medical expense</option>
+                <option value="misc">Misc</option>
+            </select>
+        
+        <label for="amount">Amount:</label>
+        <input type="number" name="amount" value="{{ expense.amount }}" required>
+
+        <button type="submit">Update</button>
+    </form>
+{% endblock %}

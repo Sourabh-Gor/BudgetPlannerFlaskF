@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monthly Budget Result</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" sizes="16x16" type="image/x-icon" href="/{{ url_for('static', filename='budgeting.ico') }}">
 </head>
 <body>
 
@@ -14,10 +15,21 @@
     <div id="result-section">
         <h2 style="color: black;">Result</h2>
         <p style="color: black;">Total Monthly Budget: ${{ '{:,.2f}'.format(budget) }}</p>
-        <p style="color: black;">Expenses: ${{ '{:,.2f}'.format(sum(expenses)) }}</p>
+        <p style="color: black;">Expenses:</p>
+        <ul style="color: black;">
+            {% for expense in expenses %}
+                <li>Amount: {{ expense.amount }}
+                    &nbsp;&nbsp;&nbsp;
+                    Description: {{ expense.description }}
+                    &nbsp;&nbsp;&nbsp;
+                    Date: {{ expense.date.strftime('%A, %B %d, %Y') }}
+                </li>
+            {% endfor %}
+        </ul>
         <p style="color: black;">Total Expenses: ${{ '{:,.2f}'.format(total_expenses) }}</p>
         <p style="color: black;">Remaining Budget: ${{ '{:,.2f}'.format(remaining_budget) }}</p>
     </div>
+    
 </div>
 <center><a href="/report"><button >Generate Graph</button></a></center>
 
