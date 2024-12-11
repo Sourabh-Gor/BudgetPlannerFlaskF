@@ -401,6 +401,8 @@ def save_plot_to_tempfile():
 
 
 if __name__ == '__main__':
+    # Ensure the app uses the port specified by Render
+    port = int(os.environ.get('PORT', 5000))  # Use 5000 as a default for local development
     with app.app_context():
         db.create_all()   # Create the database tables
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=port, debug=True)
